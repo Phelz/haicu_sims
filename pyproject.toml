@@ -11,9 +11,12 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "haicu_sims", from = "src"},
-            {include = "bfield", from = "haicu_sims"},
-            {include = "bcoils", from = "haicu_sims"}]
+packages = [
+            {include = "bfield", from = "src"},
+            {include = "bcoils", from = "src"},
+            
+            {include = "data", from = "."},
+            ]
 
 
 [build-system]
