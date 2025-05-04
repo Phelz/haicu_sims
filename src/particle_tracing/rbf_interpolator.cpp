@@ -27,9 +27,7 @@ void mathtoolbox::RbfInterpolator::SetData(const MatrixXd &X, const VectorXd &y)
 void mathtoolbox::RbfInterpolator::CalcWeights(const bool use_regularization, const double lambda)
 {
     const int num_data = m_y.rows();
-    std::cout << "Number of data points: " << num_data << std::endl;
     MatrixXd Phi{num_data, num_data};
-    std::cout << "Phi matrix size: " << Phi.rows() << " x " << Phi.cols() << std::endl;
 
     for (int i = 0; i < num_data; ++i)
     {

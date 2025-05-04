@@ -157,9 +157,6 @@ int main()
     double r_tol = 0.005; // Radius tolerance
     double epsilon = 1.0;
 
-    MatrixXd X_near;
-    VectorXd Bx_near, By_near, Bz_near;
-    extract_points_within_radius(X, Bx, By, Bz, X_near, Bx_near, By_near, Bz_near, query_point, r_tol);
 
     // Interpolators
     RbfInterpolator interp_Bx(GaussianRbfKernel(epsilon), true);
@@ -171,6 +168,10 @@ int main()
     // interp_Bx.SetData(X, Bx);
     // interp_By.SetData(X, By);
     // interp_Bz.SetData(X, Bz);
+
+    MatrixXd X_near;
+    VectorXd Bx_near, By_near, Bz_near;
+    extract_points_within_radius(X, Bx, By, Bz, X_near, Bx_near, By_near, Bz_near, query_point, r_tol);
 
     interp_Bx.SetData(X_near, Bx_near);
     interp_By.SetData(X_near, By_near);
