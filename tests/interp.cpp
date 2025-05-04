@@ -154,7 +154,7 @@ int main()
 
     // Interpolate at a query point
     Vector3d query_point(0.0, 0.0, -0.15);
-    double r_tol = 0.01; // Radius tolerance
+    double r_tol = 0.005; // Radius tolerance
     double epsilon = 1.0;
 
     MatrixXd X_near;
