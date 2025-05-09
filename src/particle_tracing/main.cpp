@@ -25,7 +25,9 @@ using namespace mathtoolbox;
 const PRECISION_TYPE mm_to_m = 1e-3;
 const PRECISION_TYPE mass = 1.67e-27; // Mass of a hydrogen atom in kilograms
 const PRECISION_TYPE bohr_magneton = 9.274e-24; // Bohr magneton in J/T
-const PRECISION_TYPE mu = bohr_magneton/mass; // Magnetic moment per unit mass
+
+// ! NOTICE THE MINUS SIGN
+const PRECISION_TYPE mu = -bohr_magneton/mass; // Magnetic moment per unit mass
 
 const PRECISION_TYPE grid_step = 0.00295309; // Grid step in meters
 const PRECISION_TYPE half_grid_step = grid_step / 2.0; // Half grid step
@@ -163,8 +165,9 @@ Vector3d generateRandomVelocity() {
     // Random number generators
     random_device rd;
     mt19937 gen(rd());
-    normal_distribution<> dist_parr(50.0, 50.0); // Gaussian in the parallel direction
-    normal_distribution<> dist_perp(0.0, 50.0); // Gaussian in the perpendicular direction
+    // ! MESSING W GAUSSIANS
+    normal_distribution<> dist_parr(75.0, 5.0); // Gaussian in the parallel direction
+    normal_distribution<> dist_perp(0.0, 5.0); // Gaussian in the perpendicular direction
     uniform_real_distribution<> dist_angle(0.0, 2 * M_PI); // The perpindicular vector itself needs its direction randomized
 
     // Scale parallel component
@@ -190,10 +193,89 @@ Vector3d generateRandomVelocity() {
 }
 
 
-// PRECISION_TYPE calcBx(PRECISION_TYPE x) {
+// Vector3d diffEqnFunc(PRECISION_TYPE t, Vector3d r, 
+//     const MatrixXd &X, const VectorXd &Bx, const VectorXd &By, const VectorXd &Bz,
+//     RbfInterpolator &interp_Bx, RbfInterpolator &interp_By, RbfInterpolator &interp_Bz) {
+//     // Define step size
+//     PRECISION_TYPE h = grid_step/4.0;
 
+//     MatrixXd X_near;
+//     VectorXd Bx_near, By_near, Bz_near;
+//     extract_points_within_radius(X, Bx, By, Bz, X_near, Bx_near, By_near, Bz_near, r, r_tol);
 
+//     // If there's not enough points nearby, just return zero
+//     if (X_near.cols() < 3) {
+//         return Vector3d(0, 0, 0);
+//     }
 
+//     interp_Bx.SetData(X_near, Bx_near);
+//     interp_By.SetData(X_near, By_near);
+//     interp_Bz.SetData(X_near, Bz_near);
+
+//     interp_Bx.CalcWeights(true, 0.0);
+//     interp_By.CalcWeights(true, 0.0);
+//     interp_Bz.CalcWeights(true, 0.0);
+
+//     // Define offsets in x
+//     Vector3d r_m3dx = r - Vector3d(3*h, 0, 0);
+//     Vector3d r_m2dx = r - Vector3d(2*h, 0, 0);
+//     Vector3d r_m1dx = r - Vector3d(1*h, 0, 0);
+//     Vector3d r_p1dx = r + Vector3d(1*h, 0, 0);
+//     Vector3d r_p2dx = r + Vector3d(2*h, 0, 0);
+//     Vector3d r_p3dx = r + Vector3d(3*h, 0, 0);
+
+//     // Define offsets in y
+//     Vector3d r_m3dy = r - Vector3d(0, 3*h, 0);
+//     Vector3d r_m2dy = r - Vector3d(0, 2*h, 0);
+//     Vector3d r_m1dy = r - Vector3d(0, 1*h, 0);
+//     Vector3d r_p1dy = r + Vector3d(0, 1*h, 0);
+//     Vector3d r_p2dy = r + Vector3d(0, 2*h, 0);
+//     Vector3d r_p3dy = r + Vector3d(0, 3*h, 0);
+
+//     // Define offsets in z
+//     Vector3d r_m3dz = r - Vector3d(0, 0, 3*h);
+//     Vector3d r_m2dz = r - Vector3d(0, 0, 2*h);
+//     Vector3d r_m1dz = r - Vector3d(0, 0, 1*h);
+//     Vector3d r_p1dz = r + Vector3d(0, 0, 1*h);
+//     Vector3d r_p2dz = r + Vector3d(0, 0, 2*h);
+//     Vector3d r_p3dz = r + Vector3d(0, 0, 3*h);
+
+//     // Compute derivatives
+// // 6th-order central differences
+//     PRECISION_TYPE dBx_dx = (interp_Bx.CalcValue(r_m3dx) - 9*interp_Bx.CalcValue(r_m2dx) + 45*interp_Bx.CalcValue(r_m1dx)
+//                         - 45*interp_Bx.CalcValue(r_p1dx) + 9*interp_Bx.CalcValue(r_p2dx) - interp_Bx.CalcValue(r_p3dx)) / (60.0 * h);
+//     // cout << "dBx_dx: " << dBx_dx << endl;
+
+//     PRECISION_TYPE dBx_dy = (interp_Bx.CalcValue(r_m3dy) - 9*interp_Bx.CalcValue(r_m2dy) + 45*interp_Bx.CalcValue(r_m1dy)
+//                         - 45*interp_Bx.CalcValue(r_p1dy) + 9*interp_Bx.CalcValue(r_p2dy) - interp_Bx.CalcValue(r_p3dy)) / (60.0 * h);
+
+//     PRECISION_TYPE dBx_dz = (interp_Bx.CalcValue(r_m3dz) - 9*interp_Bx.CalcValue(r_m2dz) + 45*interp_Bx.CalcValue(r_m1dz)
+//                         - 45*interp_Bx.CalcValue(r_p1dz) + 9*interp_Bx.CalcValue(r_p2dz) - interp_Bx.CalcValue(r_p3dz)) / (60.0 * h);
+
+//     PRECISION_TYPE dBy_dx = (interp_By.CalcValue(r_m3dx) - 9*interp_By.CalcValue(r_m2dx) + 45*interp_By.CalcValue(r_m1dx)
+//                         - 45*interp_By.CalcValue(r_p1dx) + 9*interp_By.CalcValue(r_p2dx) - interp_By.CalcValue(r_p3dx)) / (60.0 * h);
+
+//     PRECISION_TYPE dBy_dy = (interp_By.CalcValue(r_m3dy) - 9*interp_By.CalcValue(r_m2dy) + 45*interp_By.CalcValue(r_m1dy)
+//                         - 45*interp_By.CalcValue(r_p1dy) + 9*interp_By.CalcValue(r_p2dy) - interp_By.CalcValue(r_p3dy)) / (60.0 * h);
+
+//     PRECISION_TYPE dBy_dz = (interp_By.CalcValue(r_m3dz) - 9*interp_By.CalcValue(r_m2dz) + 45*interp_By.CalcValue(r_m1dz)
+//                         - 45*interp_By.CalcValue(r_p1dz) + 9*interp_By.CalcValue(r_p2dz) - interp_By.CalcValue(r_p3dz)) / (60.0 * h);
+
+//     PRECISION_TYPE dBz_dx = (interp_Bz.CalcValue(r_m3dx) - 9*interp_Bz.CalcValue(r_m2dx) + 45*interp_Bz.CalcValue(r_m1dx)
+//                         - 45*interp_Bz.CalcValue(r_p1dx) + 9*interp_Bz.CalcValue(r_p2dx) - interp_Bz.CalcValue(r_p3dx)) / (60.0 * h);
+
+//     PRECISION_TYPE dBz_dy = (interp_Bz.CalcValue(r_m3dy) - 9*interp_Bz.CalcValue(r_m2dy) + 45*interp_Bz.CalcValue(r_m1dy)
+//                         - 45*interp_Bz.CalcValue(r_p1dy) + 9*interp_Bz.CalcValue(r_p2dy) - interp_Bz.CalcValue(r_p3dy)) / (60.0 * h);
+
+//     PRECISION_TYPE dBz_dz = (interp_Bz.CalcValue(r_m3dz) - 9*interp_Bz.CalcValue(r_m2dz) + 45*interp_Bz.CalcValue(r_m1dz)
+//                         - 45*interp_Bz.CalcValue(r_p1dz) + 9*interp_Bz.CalcValue(r_p2dz) - interp_Bz.CalcValue(r_p3dz)) / (60.0 * h);
+
+//     PRECISION_TYPE dv_x = (dBx_dx + dBy_dx + dBz_dx) * mu;
+//     PRECISION_TYPE dv_y = (dBx_dy + dBy_dy + dBz_dy) * mu;
+//     PRECISION_TYPE dv_z = (dBx_dz + dBy_dz + dBz_dz) * mu;
+
+//     Vector3d dv = Vector3d(dv_x, dv_y, dv_z);
+//     return dv;
 
 // }
 
@@ -219,43 +301,58 @@ Vector3d diffEqnFunc(PRECISION_TYPE t, Vector3d r,
     interp_By.CalcWeights(true, 0.0);
     interp_Bz.CalcWeights(true, 0.0);
 
+    // Get the field at the current position
+    PRECISION_TYPE Bx_at_r = interp_Bx.CalcValue(r);
+    PRECISION_TYPE By_at_r = interp_By.CalcValue(r);
+    PRECISION_TYPE Bz_at_r = interp_Bz.CalcValue(r);
+
+    PRECISION_TYPE B = sqrt(Bx_at_r * Bx_at_r + By_at_r * By_at_r + Bz_at_r * Bz_at_r);
+    PRECISION_TYPE scaling_factor = mu / B;
+
+
     // Here, I use A Radial Basis Function (RBF) interpolator to get the B-field at various positions
     // The various positions in question correspond to a central finite difference scheme to calculate the gradient of the B-field
 
-    Vector3d r_plus_dx = r + Vector3d(half_grid_step, 0, 0);
-    Vector3d r_plus_dy = r + Vector3d(0, half_grid_step, 0);
-    Vector3d r_plus_dz = r + Vector3d(0, 0, half_grid_step);
+    PRECISION_TYPE h = grid_step/8.0;
 
-    Vector3d r_plus_2dx = r + Vector3d(2*half_grid_step, 0, 0);
-    Vector3d r_plus_2dy = r + Vector3d(0, 2*half_grid_step, 0);
-    Vector3d r_plus_2dz = r + Vector3d(0, 0, 2*half_grid_step);
+    Vector3d r_plus_dx = r + Vector3d(h, 0, 0);
+    Vector3d r_plus_dy = r + Vector3d(0, h, 0);
+    Vector3d r_plus_dz = r + Vector3d(0, 0, h);
 
-    Vector3d r_minus_dx = r - Vector3d(half_grid_step, 0, 0);
-    Vector3d r_minus_dy = r - Vector3d(0, half_grid_step, 0);
-    Vector3d r_minus_dz = r - Vector3d(0, 0, half_grid_step);
+    Vector3d r_plus_2dx = r + Vector3d(2*h, 0, 0);
+    Vector3d r_plus_2dy = r + Vector3d(0, 2*h, 0);
+    Vector3d r_plus_2dz = r + Vector3d(0, 0, 2*h);
 
-    Vector3d r_minus_2dx = r - Vector3d(2*half_grid_step, 0, 0);
-    Vector3d r_minus_2dy = r - Vector3d(0, 2*half_grid_step, 0);
-    Vector3d r_minus_2dz = r - Vector3d(0, 0, 2*half_grid_step);
+    Vector3d r_minus_dx = r - Vector3d(h, 0, 0);
+    Vector3d r_minus_dy = r - Vector3d(0, h, 0);
+    Vector3d r_minus_dz = r - Vector3d(0, 0, h);
+
+    Vector3d r_minus_2dx = r - Vector3d(2*h, 0, 0);
+    Vector3d r_minus_2dy = r - Vector3d(0, 2*h, 0);
+    Vector3d r_minus_2dz = r - Vector3d(0, 0, 2*h);
     
     // 4th order central difference
-    PRECISION_TYPE dBx_dx = (-interp_Bx.CalcValue(r_plus_2dx) + 8*interp_Bx.CalcValue(r_plus_dx) - 8*interp_Bx.CalcValue(r_minus_dx) + interp_Bx.CalcValue(r_minus_2dx)) / (12*half_grid_step);
-    PRECISION_TYPE dBx_dy = (-interp_By.CalcValue(r_plus_2dy) + 8*interp_By.CalcValue(r_plus_dy) - 8*interp_By.CalcValue(r_minus_dy) + interp_By.CalcValue(r_minus_2dy)) / (12*half_grid_step);
-    PRECISION_TYPE dBx_dz = (-interp_Bz.CalcValue(r_plus_2dz) + 8*interp_Bz.CalcValue(r_plus_dz) - 8*interp_Bz.CalcValue(r_minus_dz) + interp_Bz.CalcValue(r_minus_2dz)) / (12*half_grid_step);
+    PRECISION_TYPE dBx_dx = (-interp_Bx.CalcValue(r_plus_2dx) + 8*interp_Bx.CalcValue(r_plus_dx) - 8*interp_Bx.CalcValue(r_minus_dx) + interp_Bx.CalcValue(r_minus_2dx)) / (12*h);
+    PRECISION_TYPE dBx_dy = (-interp_By.CalcValue(r_plus_2dy) + 8*interp_By.CalcValue(r_plus_dy) - 8*interp_By.CalcValue(r_minus_dy) + interp_By.CalcValue(r_minus_2dy)) / (12*h);
+    PRECISION_TYPE dBx_dz = (-interp_Bz.CalcValue(r_plus_2dz) + 8*interp_Bz.CalcValue(r_plus_dz) - 8*interp_Bz.CalcValue(r_minus_dz) + interp_Bz.CalcValue(r_minus_2dz)) / (12*h);
 
-    PRECISION_TYPE dBy_dx = (-interp_Bx.CalcValue(r_plus_2dx) + 8*interp_Bx.CalcValue(r_plus_dx) - 8*interp_Bx.CalcValue(r_minus_dx) + interp_Bx.CalcValue(r_minus_2dx)) / (12*half_grid_step);
-    PRECISION_TYPE dBy_dy = (-interp_By.CalcValue(r_plus_2dy) + 8*interp_By.CalcValue(r_plus_dy) - 8*interp_By.CalcValue(r_minus_dy) + interp_By.CalcValue(r_minus_2dy)) / (12*half_grid_step);
-    PRECISION_TYPE dBy_dz = (-interp_Bz.CalcValue(r_plus_2dz) + 8*interp_Bz.CalcValue(r_plus_dz) - 8*interp_Bz.CalcValue(r_minus_dz) + interp_Bz.CalcValue(r_minus_2dz)) / (12*half_grid_step);
+    PRECISION_TYPE dBy_dx = (-interp_Bx.CalcValue(r_plus_2dx) + 8*interp_Bx.CalcValue(r_plus_dx) - 8*interp_Bx.CalcValue(r_minus_dx) + interp_Bx.CalcValue(r_minus_2dx)) / (12*h);
+    PRECISION_TYPE dBy_dy = (-interp_By.CalcValue(r_plus_2dy) + 8*interp_By.CalcValue(r_plus_dy) - 8*interp_By.CalcValue(r_minus_dy) + interp_By.CalcValue(r_minus_2dy)) / (12*h);
+    PRECISION_TYPE dBy_dz = (-interp_Bz.CalcValue(r_plus_2dz) + 8*interp_Bz.CalcValue(r_plus_dz) - 8*interp_Bz.CalcValue(r_minus_dz) + interp_Bz.CalcValue(r_minus_2dz)) / (12*h);
 
-    PRECISION_TYPE dBz_dx = (-interp_Bx.CalcValue(r_plus_2dx) + 8*interp_Bx.CalcValue(r_plus_dx) - 8*interp_Bx.CalcValue(r_minus_dx) + interp_Bx.CalcValue(r_minus_2dx)) / (12*half_grid_step);
-    PRECISION_TYPE dBz_dy = (-interp_By.CalcValue(r_plus_2dy) + 8*interp_By.CalcValue(r_plus_dy) - 8*interp_By.CalcValue(r_minus_dy) + interp_By.CalcValue(r_minus_2dy)) / (12*half_grid_step);
-    PRECISION_TYPE dBz_dz = (-interp_Bz.CalcValue(r_plus_2dz) + 8*interp_Bz.CalcValue(r_plus_dz) - 8*interp_Bz.CalcValue(r_minus_dz) + interp_Bz.CalcValue(r_minus_2dz)) / (12*half_grid_step);
+    PRECISION_TYPE dBz_dx = (-interp_Bx.CalcValue(r_plus_2dx) + 8*interp_Bx.CalcValue(r_plus_dx) - 8*interp_Bx.CalcValue(r_minus_dx) + interp_Bx.CalcValue(r_minus_2dx)) / (12*h);
+    PRECISION_TYPE dBz_dy = (-interp_By.CalcValue(r_plus_2dy) + 8*interp_By.CalcValue(r_plus_dy) - 8*interp_By.CalcValue(r_minus_dy) + interp_By.CalcValue(r_minus_2dy)) / (12*h);
+    PRECISION_TYPE dBz_dz = (-interp_Bz.CalcValue(r_plus_2dz) + 8*interp_Bz.CalcValue(r_plus_dz) - 8*interp_Bz.CalcValue(r_minus_dz) + interp_Bz.CalcValue(r_minus_2dz)) / (12*h);
 
 
     // Instead of construct the Jacobian and do matrix multiplication, this is easier to read
-    PRECISION_TYPE dv_x = (dBx_dx + dBy_dx + dBz_dx) * mu;
-    PRECISION_TYPE dv_y = (dBx_dy + dBy_dy + dBz_dy) * mu;
-    PRECISION_TYPE dv_z = (dBx_dz + dBy_dz + dBz_dz) * mu;
+    // PRECISION_TYPE dv_x = (dBx_dx + dBy_dx + dBz_dx) * scaling_factor;
+    // PRECISION_TYPE dv_y = (dBx_dy + dBy_dy + dBz_dy) * scaling_factor;
+    // PRECISION_TYPE dv_z = (dBx_dz + dBy_dz + dBz_dz) * scaling_factor;
+
+    PRECISION_TYPE dv_x = (Bx_at_r * dBx_dx + By_at_r * dBy_dx + Bz_at_r * dBz_dx) * scaling_factor;
+    PRECISION_TYPE dv_y = (Bx_at_r * dBx_dy + By_at_r * dBy_dy + Bz_at_r * dBz_dy) * scaling_factor;
+    PRECISION_TYPE dv_z = (Bx_at_r * dBx_dz + By_at_r * dBy_dz + Bz_at_r * dBz_dz) * scaling_factor;
 
     Vector3d dv = Vector3d(dv_x, dv_y, dv_z);
     return dv;
@@ -345,9 +442,9 @@ int main() {
     */
     
     // Time
-    PRECISION_TYPE dt = 2e-6; // Time step in seconds
+    PRECISION_TYPE dt = 1e-7; // Time step in seconds
     PRECISION_TYPE t_0 = 0.0; // Initial time
-    PRECISION_TYPE t_f = 1e-3; // Final time
+    PRECISION_TYPE t_f = 1e-2; // Final time
 
     // Interpolators
     RbfInterpolator interp_Bx(GaussianRbfKernel(epsilon), true);
@@ -382,7 +479,7 @@ int main() {
 
     // Parrallel processing
     omp_set_dynamic(0);  // Disable dynamic adjustment of threads
-    omp_set_num_threads(24); // Set the number of threads to use
+    omp_set_num_threads(NUM_THREADS); // Set the number of threads to use
 
     const int num_particles = 100;
     Vector3d dv;
@@ -395,6 +492,7 @@ int main() {
 
         // Open a file to store the output for this particle
         ofstream output_file("../data/traces/particle_" + to_string(i + 1) + "_trajectory.csv");
+
         output_file.precision(16); 
         if (!output_file.is_open()) {
             cerr << "Failed to open output file for particle " << i + 1 << endl;
@@ -422,10 +520,12 @@ int main() {
             initial_position += dt * initial_velocity;
             initial_velocity = dv; // Update the velocity for the next step
 
-            // if ever the particle goes out of  the grid bounds, terminate
+            // if ever the particle goes out of the grid bounds, terminate and stop writing to the file
             if (initial_position.x() < FINAL_XMIN || initial_position.x() > FINAL_XMAX ||
                 initial_position.y() < FINAL_YMIN || initial_position.y() > FINAL_YMAX ||
                 initial_position.z() < FINAL_ZMIN || initial_position.z() > FINAL_ZMAX) {
+                output_file.close(); // Close the file
+                // remove(("../data/traces/particle_" + to_string(i + 1) + "_trajectory.csv").c_str()); // Delete the file
                 break;
             }
 

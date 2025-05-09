@@ -83,7 +83,7 @@ const PRECISION_TYPE FINAL_ZMAX = 0.07311966058022869;
 
 // * Simulation * //
 constexpr auto OUTPUT_PRECISION = 20;
-constexpr auto NUM_THREADS = 28;
+constexpr auto NUM_THREADS = 2;
 // constexpr auto NUM_THREADS = 4;
 
 // * Data * //
